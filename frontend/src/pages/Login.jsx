@@ -50,10 +50,35 @@ const Login = () => {
         ? 'http://localhost:5000' 
         : (import.meta.env.VITE_API_URL || '')
       
+      // Validate that we have an API URL
+      if (!apiBaseUrl && !import.meta.env.DEV) {
+        throw new Error('Backend API URL is not configured. Please set VITE_API_URL environment variable in Netlify.')
+      }
+      
       const endpoint = isSignup ? '/api/auth/signup' : '/api/auth/login'
       const apiUrl = apiBaseUrl ? `${apiBaseUrl}${endpoint}` : endpoint
       
       console.log('Making API request to:', apiUrl)
+      console.log('Environment:', import.meta.env.DEV ? 'Development' : 'Production')
+      console.log('API Base URL:', apiBaseUrl || 'Not configured')
+      
+      // First, try to check if backend is accessible (only in development)
+      if (import.meta.env.DEV && apiBaseUrl) {
+        try {
+          const healthCheck = await fetch(`${apiBaseUrl}/api/health`, { 
+            method: 'GET',
+            signal: AbortSignal.timeout(3000) // 3 second timeout
+          })
+          if (!healthCheck.ok) {
+            throw new Error(`Backend health check failed. Status: ${healthCheck.status}`)
+          }
+          const healthData = await healthCheck.json()
+          console.log('Backend health check:', healthData)
+        } catch (healthError) {
+          console.warn('Backend health check failed:', healthError)
+          throw new Error('Backend server is not running. Please start it with: cd backend && npm run dev')
+        }
+      }
       
       const response = await fetch(apiUrl, {
         method: 'POST',

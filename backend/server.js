@@ -574,10 +574,36 @@ app.patch('/api/users/:id', async (req, res) => {
   }
 })
 
+// Health check endpoint (should be at the top, but keeping it here for now)
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    message: 'Happy Diagnostics Center API is running',
+    timestamp: new Date().toISOString(),
+    supabase: supabase ? 'connected' : 'not configured'
+  })
+})
+
+// Test endpoint to verify server is accessible
+app.get('/api/test', (req, res) => {
+  res.json({ 
+    success: true,
+    message: 'Backend server is accessible',
+    endpoints: {
+      health: '/api/health',
+      signup: '/api/auth/signup',
+      login: '/api/auth/login',
+      contact: '/api/contact'
+    }
+  })
+})
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server is running on http://localhost:${PORT}`)
   console.log(`📡 API endpoints available at http://localhost:${PORT}/api`)
+  console.log(`✅ Health check: http://localhost:${PORT}/api/health`)
+  console.log(`🧪 Test endpoint: http://localhost:${PORT}/api/test`)
 })
 
 
