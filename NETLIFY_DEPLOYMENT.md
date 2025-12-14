@@ -62,12 +62,25 @@ All routes should work now!
 
 ### Backend API Issues
 
-Note: The backend (Express server) needs to be deployed separately. Netlify only hosts the frontend.
+**IMPORTANT:** The backend (Express server) needs to be deployed separately. Netlify only hosts the frontend.
 
-Options:
-1. Deploy backend to a service like Render, Railway, or Heroku
-2. Update API URLs in the frontend to point to the deployed backend
-3. Or use Netlify Functions for API endpoints
+**Current Issue:** Login/authentication will fail with "Failed to fetch" because the backend isn't deployed.
+
+**Solutions:**
+
+1. **Deploy Backend Separately** (Recommended):
+   - Deploy backend to Render, Railway, Heroku, or similar
+   - Get the backend URL (e.g., `https://your-backend.railway.app`)
+   - Add environment variable in Netlify: `VITE_API_URL=https://your-backend.railway.app`
+   - Redeploy frontend
+
+2. **Quick Test (Local Development Only)**:
+   - Run backend locally: `cd backend && npm run dev`
+   - Frontend will connect to `http://localhost:5000` automatically in dev mode
+
+3. **Use Netlify Functions** (Alternative):
+   - Convert Express routes to Netlify Functions
+   - More complex but keeps everything in one place
 
 ## Current Setup
 

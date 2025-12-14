@@ -45,10 +45,13 @@ const Login = () => {
     setLoading(true)
 
     try {
-      // Use direct backend URL to avoid proxy issues
-      const apiUrl = isSignup 
-        ? 'http://localhost:5000/api/auth/signup' 
-        : 'http://localhost:5000/api/auth/login'
+      // Get API base URL from environment or use localhost in development
+      const apiBaseUrl = import.meta.env.DEV 
+        ? 'http://localhost:5000' 
+        : (import.meta.env.VITE_API_URL || '')
+      
+      const endpoint = isSignup ? '/api/auth/signup' : '/api/auth/login'
+      const apiUrl = apiBaseUrl ? `${apiBaseUrl}${endpoint}` : endpoint
       
       console.log('Making API request to:', apiUrl)
       
@@ -95,7 +98,19 @@ const Login = () => {
       }
     } catch (error) {
       console.error('Authentication error:', error)
-      setError(error.message || 'Authentication failed. Please try again.')
+      
+      // Provide more helpful error messages
+      let errorMessage = 'Authentication failed. Please try again.'
+      
+      if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+        errorMessage = 'Unable to connect to the server. Please check your internet connection or contact support if the problem persists.'
+      } else if (error.message.includes('404') || error.message.includes('endpoint not found')) {
+        errorMessage = 'Backend server is not available. Please ensure the backend is running and configured correctly.'
+      } else {
+        errorMessage = error.message || errorMessage
+      }
+      
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }

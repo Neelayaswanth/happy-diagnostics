@@ -412,9 +412,16 @@ const PaymentsTab = () => {
     fetchPayments()
   }, [])
 
+  const getApiUrl = (endpoint) => {
+    const apiBaseUrl = import.meta.env.DEV 
+      ? 'http://localhost:5000' 
+      : (import.meta.env.VITE_API_URL || '')
+    return apiBaseUrl ? `${apiBaseUrl}${endpoint}` : endpoint
+  }
+
   const fetchPayments = async () => {
     try {
-      const response = await fetch('/api/admin/payments')
+      const response = await fetch(getApiUrl('/api/admin/payments'))
       const data = await response.json()
       if (data.success) {
         setPayments(data.data || [])
@@ -430,7 +437,7 @@ const PaymentsTab = () => {
 
   const updatePaymentStatus = async (paymentId, newStatus) => {
     try {
-      const response = await fetch(`/api/admin/payments/${paymentId}/status`, {
+      const response = await fetch(getApiUrl(`/api/admin/payments/${paymentId}/status`), {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus }),
