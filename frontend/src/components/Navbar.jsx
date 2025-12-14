@@ -39,9 +39,10 @@ const Navbar = () => {
       <div className="navbar-main">
         <div className="container">
           <div className="navbar-content">
-            <Link to="/" className="navbar-logo">
+            <Link to="/" className="navbar-logo" title="Happy Labs - Happy Diagnostics Center">
               <span className="logo-text">Happy Diagnostics</span>
               <span className="logo-subtitle">Center</span>
+              <span style={{ display: 'none' }}>Happy Labs</span>
             </Link>
             <button 
               className="mobile-menu-btn"

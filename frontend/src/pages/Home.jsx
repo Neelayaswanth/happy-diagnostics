@@ -24,6 +24,12 @@ const Home = () => {
 
   return (
     <main>
+      {/* SEO: Hidden text for search engines */}
+      <div style={{ display: 'none' }}>
+        <h1>Happy Labs - Happy Diagnostics Center</h1>
+        <p>Happy Labs, also known as Happy Diagnostics Center, is your trusted partner in healthcare diagnostics. We provide advanced diagnostic services, lab tests, health packages, and comprehensive medical testing with cutting-edge technology.</p>
+      </div>
+      
       {/* Hero Section */}
       <section className="hero">
         <div className="container">

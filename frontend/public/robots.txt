@@ -1,0 +1,18 @@
+# robots.txt for Happy Labs - Happy Diagnostics Center
+User-agent: *
+Allow: /
+
+# Sitemap location
+Sitemap: https://happydiagnostics.com/sitemap.xml
+
+# Disallow admin and private routes
+Disallow: /admin/
+Disallow: /api/
+
+# Allow all public pages
+Allow: /
+Allow: /services
+Allow: /packages
+Allow: /about
+Allow: /contact
+
