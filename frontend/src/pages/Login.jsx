@@ -72,7 +72,14 @@ const Login = () => {
       if (!contentType || !contentType.includes('application/json')) {
         const text = await response.text()
         console.error('Non-JSON response received:', text.substring(0, 200))
-        throw new Error(`Server returned ${response.status}. Backend may not be running or endpoint not found.`)
+        
+        if (response.status === 404) {
+          throw new Error('Backend endpoint not found. Please ensure the backend server is running and the API routes are configured correctly.')
+        } else if (response.status === 0 || !response.ok) {
+          throw new Error('Failed to connect to backend server. Please check if the backend is running and accessible.')
+        } else {
+          throw new Error(`Server returned ${response.status}. Backend may not be running or endpoint not found.`)
+        }
       }
       
       const data = await response.json()
@@ -102,10 +109,15 @@ const Login = () => {
       // Provide more helpful error messages
       let errorMessage = 'Authentication failed. Please try again.'
       
-      if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-        errorMessage = 'Unable to connect to the server. Please check your internet connection or contact support if the problem persists.'
-      } else if (error.message.includes('404') || error.message.includes('endpoint not found')) {
-        errorMessage = 'Backend server is not available. Please ensure the backend is running and configured correctly.'
+      if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError') || error.message.includes('Network request failed')) {
+        const isDev = import.meta.env.DEV
+        const apiUrl = import.meta.env.VITE_API_URL || 'not configured'
+        
+        errorMessage = isDev 
+          ? 'Unable to connect to backend server. Please ensure the backend is running on http://localhost:5000. Run "cd backend && npm run dev" to start it.'
+          : `Backend server is not available. ${apiUrl === 'not configured' ? 'Backend URL is not configured. Please set VITE_API_URL environment variable in Netlify.' : `Please ensure the backend is deployed and accessible at ${apiUrl}`}`
+      } else if (error.message.includes('404') || error.message.includes('endpoint not found') || error.message.includes('Server returned')) {
+        errorMessage = 'Backend server endpoint not found. Please ensure the backend is running and the API routes are configured correctly.'
       } else {
         errorMessage = error.message || errorMessage
       }
