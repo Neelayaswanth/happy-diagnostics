@@ -414,42 +414,38 @@ const PaymentsTab = () => {
 
   const fetchPayments = async () => {
     try {
-      const { data: paymentsData, error } = await supabase
-        .from('payments')
-        .select('*')
-        .order('created_at', { ascending: false })
-
-      if (error) throw error
-
-      // Fetch related data for each payment
-      const paymentsWithDetails = await Promise.all(
-        (paymentsData || []).map(async (payment) => {
-          const [bookingData, userData] = await Promise.all([
-            supabase
-              .from('bookings')
-              .select('package_name')
-              .eq('id', payment.booking_id)
-              .single(),
-            supabase
-              .from('users')
-              .select('mobile, name')
-              .eq('id', payment.user_id)
-              .single()
-          ])
-          
-          return {
-            ...payment,
-            bookings: bookingData.data || { package_name: 'N/A' },
-            users: userData.data || { mobile: 'N/A' }
-          }
-        })
-      )
-
-      setPayments(paymentsWithDetails)
+      const response = await fetch('/api/admin/payments')
+      const data = await response.json()
+      if (data.success) {
+        setPayments(data.data || [])
+      } else {
+        console.error('Failed to fetch payments:', data.error)
+      }
     } catch (error) {
       console.error('Error fetching payments:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const updatePaymentStatus = async (paymentId, newStatus) => {
+    try {
+      const response = await fetch(`/api/admin/payments/${paymentId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      })
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        alert(`Payment status updated to ${newStatus} successfully!`)
+        fetchPayments()
+      } else {
+        throw new Error(data.error || 'Failed to update payment status')
+      }
+    } catch (error) {
+      console.error('Error updating payment:', error)
+      alert(`Failed to update payment status: ${error.message}`)
     }
   }
 
@@ -482,12 +478,13 @@ const PaymentsTab = () => {
             <th>Method</th>
             <th>Status</th>
             <th>Date</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           {payments.length === 0 ? (
             <tr>
-              <td colSpan="7" style={{ textAlign: 'center', padding: '40px' }}>
+              <td colSpan="8" style={{ textAlign: 'center', padding: '40px' }}>
                 No payments found
               </td>
             </tr>
@@ -505,6 +502,29 @@ const PaymentsTab = () => {
                   </span>
                 </td>
                 <td>{new Date(payment.created_at).toLocaleString()}</td>
+                <td>
+                  <div className="admin-actions">
+                    {payment.status === 'pending' && (
+                      <button
+                        onClick={() => updatePaymentStatus(payment.id, 'completed')}
+                        className="admin-btn-small admin-btn-confirm"
+                      >
+                        Mark Completed
+                      </button>
+                    )}
+                    {payment.status === 'completed' && (
+                      <button
+                        onClick={() => updatePaymentStatus(payment.id, 'pending')}
+                        className="admin-btn-small admin-btn-cancel"
+                      >
+                        Mark Pending
+                      </button>
+                    )}
+                    {(payment.status === 'failed' || payment.status === 'refunded') && (
+                      <span className="admin-action-done">No actions</span>
+                    )}
+                  </div>
+                </td>
               </tr>
             ))
           )}

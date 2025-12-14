@@ -293,6 +293,12 @@
   background: #dc2626;
 }
 
+.admin-action-done {
+  color: var(--text-light);
+  font-size: 0.875rem;
+  font-style: italic;
+}
+
 .admin-btn-view {
   background: var(--primary-color);
   color: var(--white);

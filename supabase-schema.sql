@@ -176,4 +176,12 @@ CREATE POLICY "Allow users read own payments"
   TO anon, authenticated
   USING (true);
 
+-- Policy: Allow admin to update payments (for admin panel)
+CREATE POLICY "Allow admin update payments"
+  ON payments
+  FOR UPDATE
+  TO anon, authenticated
+  USING (true)
+  WITH CHECK (true);
+
 

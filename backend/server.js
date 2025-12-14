@@ -455,6 +455,34 @@ app.get('/api/admin/payments', async (req, res) => {
   }
 })
 
+// Update payment status (admin endpoint)
+app.patch('/api/admin/payments/:id/status', async (req, res) => {
+  if (!supabase) return res.status(500).json({ error: 'Supabase not initialized' })
+  const { id } = req.params
+  const { status } = req.body
+
+  if (!['pending', 'completed', 'failed', 'refunded'].includes(status)) {
+    return res.status(400).json({ error: 'Invalid status provided' })
+  }
+
+  try {
+    const { data, error } = await supabase
+      .from('payments')
+      .update({ status })
+      .eq('id', id)
+      .select()
+
+    if (error) throw error
+    if (!data || data.length === 0) {
+      return res.status(404).json({ error: 'Payment not found' })
+    }
+    res.json({ success: true, message: `Payment ${id} status updated to ${status}`, data: data[0] })
+  } catch (error) {
+    console.error('Error updating payment status:', error)
+    res.status(500).json({ error: 'Failed to update payment status' })
+  }
+})
+
 // Get all contact submissions (admin)
 app.get('/api/admin/contacts', async (req, res) => {
   try {
